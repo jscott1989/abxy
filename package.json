@@ -2,7 +2,7 @@
   "name": "abxy",
   "version": "0.2.0",
   "description": "Library for creating Gamepad-compatible interfaces",
-  "main": "index.js",
+  "main": "dist/abxy.min.js",
   "directories": {},
   "scripts": {},
   "repository": {
