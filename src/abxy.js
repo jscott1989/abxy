@@ -142,31 +142,33 @@ const distance = require('euclidean-distance');
             });
 
             // Set up gamepad control
-            setInterval(() => _.each(navigator.getGamepads(), (gamepad) => {
-                if (gamepad.connected) {
-                    // We don't care about disconnected ones
+            if (navigator.getGamepads) {
+                setInterval(() => _.each(navigator.getGamepads(), (gamepad) => {
+                    if (gamepad.connected) {
+                        // We don't care about disconnected ones
 
-                    if (Date.now() - lastMove > configuration.gamepad_inputTimeout) {
+                        if (Date.now() - lastMove > configuration.gamepad_inputTimeout) {
 
-                        _.forOwn(analogueMapping, ([lessFunc, moreFunc], axis) => {
-                            if (gamepad.axes[axis] > configuration.gamepad_analogueThreshold) {
-                                moreFunc();
-                            } else if (gamepad.axes[axis] < 0 - configuration.gamepad_analogueThreshold) {
-                                lessFunc();
-                            }
-                            lastMove = Date.now();
-                        });
-
-                        // Then DPad
-                        _.forOwn(gamepadMapping, (func, buttonIndex) => {
-                            if (gamepad.buttons[buttonIndex].pressed) {
-                                func();
+                            _.forOwn(analogueMapping, ([lessFunc, moreFunc], axis) => {
+                                if (gamepad.axes[axis] > configuration.gamepad_analogueThreshold) {
+                                    moreFunc();
+                                } else if (gamepad.axes[axis] < 0 - configuration.gamepad_analogueThreshold) {
+                                    lessFunc();
+                                }
                                 lastMove = Date.now();
-                            }
-                        });
+                            });
+
+                            // Then DPad
+                            _.forOwn(gamepadMapping, (func, buttonIndex) => {
+                                if (gamepad.buttons[buttonIndex].pressed) {
+                                    func();
+                                    lastMove = Date.now();
+                                }
+                            });
+                        }
                     }
-                }
-            }), 10);
+                }), 10);
+            };
         }
     }
 })();
