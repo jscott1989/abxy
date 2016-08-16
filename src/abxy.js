@@ -4,12 +4,46 @@ const distance = require('euclidean-distance');
 (function() {
 
     var configuration = {
-        minimumDistance: 0
+        minimumDistance: 0,
+
+        // Keyboard configuration
+        keyboard_upButton: 38,
+        keyboard_downButton: 40,
+        keyboard_leftButton: 37,
+        keyboard_rightButton: 39,
+
+        keyboard_aButton: 32,
+        keyboard_bButton: 1,
+        keyboard_xButton: 1,
+        keyboard_yButton: 1,
+
+        // Gamepad configuration
+        // TODO: Swap in a gamepad library here to normalize all this
+        gamepad_xAxis: 0,
+        gamepad_yAxis: 1,
+        gamepad_analogueThreshold: 0.4,
+        gamepad_inputTimeout: 200,
+
+        gamepad_upButton: 0,
+        gamepad_leftButton: 2,
+        gamepad_downButton: 1,
+        gamepad_rightButton: 3,
+
+        gamepad_aButton: 11,
+        gamepad_bButton: 12,
+        gamepad_xButton: 13,
+        gamepad_yButton: 14,
     };
 
     var selectedElement = null;
-    var selectedElementPosition = [0, 0];
     // We record the selected position so that borders/etc don't change it
+    var selectedElementPosition = [0, 0];
+    var lastMove = 0;
+
+
+    const keyboardMapping = {};
+    const gamepadMapping = {};
+    const analogueMapping = {};
 
     const getElements = () => document.getElementsByClassName("abxy");
 
@@ -70,7 +104,22 @@ const distance = require('euclidean-distance');
 
     window.abxy = {
         init: (_configuration = {}) => {
-            Object.assign(configuration, _configuration)
+            Object.assign(configuration, _configuration);
+
+            keyboardMapping[configuration.keyboard_upButton] = selectUp;
+            keyboardMapping[configuration.keyboard_downButton] = selectDown;
+            keyboardMapping[configuration.keyboard_leftButton] = selectLeft;
+            keyboardMapping[configuration.keyboard_rightButton] = selectRight;
+            keyboardMapping[configuration.keyboard_aButton] = click;
+
+            gamepadMapping[configuration.gamepad_upButton] = selectUp;
+            gamepadMapping[configuration.gamepad_downButton] = selectDown;
+            gamepadMapping[configuration.gamepad_leftButton] = selectLeft;
+            gamepadMapping[configuration.gamepad_rightButton] = selectRight;
+            gamepadMapping[configuration.gamepad_aButton] = click;
+
+            analogueMapping[configuration.gamepad_xAxis] = [selectLeft, selectRight];
+            analogueMapping[configuration.gamepad_yAxis] = [selectUp, selectDown];
 
             if (configuration.initialElement != null) {
                 selectElement(configuration.initialElement);
@@ -78,25 +127,46 @@ const distance = require('euclidean-distance');
                 selectElementClosestTo([0, 0]);
             }
 
+            // Set up keyboard control
             document.addEventListener("keydown", (evt) => {
-                if (evt.keyCode == 38) {
-                    selectUp();
-                } else if (evt.keyCode == 40) {
-                    selectDown();
-                } else if (evt.keyCode == 37) {
-                    selectLeft();
-                } else if (evt.keyCode == 39) {
-                    selectRight();
-                } else if (evt.keyCode == 32) {
-                    click();
-                }
+                _.forOwn(keyboardMapping, (func, keyCode) => {
+                    if (evt.keyCode == keyCode) func();
+                });
             });
 
+            // Set up mouse control
             document.addEventListener("mouseover", (evt) => {
                 if (evt.target.classList.contains("abxy")) {
                     selectElement(evt.target);
                 }
-            })
+            });
+
+            // Set up gamepad control
+            setInterval(() => _.each(navigator.getGamepads(), (gamepad) => {
+                if (gamepad.connected) {
+                    // We don't care about disconnected ones
+
+                    if (Date.now() - lastMove > configuration.gamepad_inputTimeout) {
+
+                        _.forOwn(analogueMapping, ([lessFunc, moreFunc], axis) => {
+                            if (gamepad.axes[axis] > configuration.gamepad_analogueThreshold) {
+                                moreFunc();
+                            } else if (gamepad.axes[axis] < 0 - configuration.gamepad_analogueThreshold) {
+                                lessFunc();
+                            }
+                            lastMove = Date.now();
+                        });
+
+                        // Then DPad
+                        _.forOwn(gamepadMapping, (func, buttonIndex) => {
+                            if (gamepad.buttons[buttonIndex].pressed) {
+                                func();
+                                lastMove = Date.now();
+                            }
+                        });
+                    }
+                }
+            }), 10);
         }
     }
 })();
