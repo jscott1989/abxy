@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Big Picture</title>
+    <style>
+        .abxy-hover {
+            border: 3px solid red;
+        }
+    </style>
+</head>
+<body>
+    <p>This is a page for testing ABXY. To allow things to be selectable/clickable you should add the class <code>abxy</code>.</p>
+    <button class="abxy" onClick="alert('click1')">You can click this 1</button>
+    <button class="abxy" onClick="alert('click2')">You can click this 2</button>
+    <button class="abxy" onClick="alert('click3')">You can click this 3</button>
+    <button>You can't click this</button>
+
+    <p class="abxy" onClick="alert('anything')">This works for anything</p>
+
+    <div style="position: absolute; right: 0px; top: 0px;" class="abxy">
+        It works based on position - not order
+    </div>
+    <script src="dist/abxy.min.js"></script>
+    <script>
+        abxy.init({
+            // The minimum distance should be larger than any borders/offsets applied to selected elements
+            minimumDistance: 10
+        });
+    </script>
+</body>
+</html>

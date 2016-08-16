@@ -1,0 +1,33 @@
+{
+  "name": "abxy",
+  "version": "0.1.0",
+  "description": "Library for creating Gamepad-compatible interfaces",
+  "main": "index.js",
+  "directories": {},
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jscott1989/abxy.git"
+  },
+  "author": "Jonathan Scott <jonathan@jscott.me>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jscott1989/abxy/issues"
+  },
+  "homepage": "https://github.com/jscott1989/abxy#readme",
+  "dependencies": {
+    "euclidean-distance": "^1.0.0",
+    "lodash": "^4.15.0"
+  },
+  "devDependencies": {
+    "babel-core": "^6.13.2",
+    "babel-loader": "^6.2.4",
+    "babel-preset-es2015": "^6.13.2",
+    "webpack": "^1.13.1"
+  },
+  "babel": {
+    "presets": [
+      "es2015"
+    ]
+  }
+}
