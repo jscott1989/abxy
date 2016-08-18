@@ -45,6 +45,15 @@ const distance = require('euclidean-distance');
     const gamepadMapping = {};
     const analogueMapping = {};
 
+    const getSelectedElement = () => {
+        if (!selectedElement || !document.contains(selectedElement)) {
+            selectedElement = null;
+            selectedElementPosition = [0, 0];
+            // abxy.selectElementClosestTo([0, 0])
+        }
+        return [selectedElement, selectedElementPosition];
+    }
+
     const getElements = () => document.getElementsByClassName("abxy");
 
     const getElementPosition = (elem) => {
@@ -56,9 +65,7 @@ const distance = require('euclidean-distance');
     }
 
     const selectWithFilter = (filter) => {
-        if (!selectedElement || !document.contains(selectedElement)) {
-            abxy.selectElementClosestTo([0, 0])
-        }
+        var [selectedElement, selectedElementPosition] = getSelectedElement();
         const elements = _.filter(getElements(), (elem) => 
             elem != selectedElement && filter(selectedElementPosition, elem)
         );
@@ -78,6 +85,7 @@ const distance = require('euclidean-distance');
         getElementPosition(elem)[0] - configuration.minimumDistance > position[0]);
 
     const click = () => {
+        var [selectedElement, selectedElementPosition] = getSelectedElement();
         if (selectedElement != null) {
             selectedElement.click();
         }
