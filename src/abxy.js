@@ -55,20 +55,14 @@ const distance = require('euclidean-distance');
         return [b.left + b.right / 2, b.top + b.bottom / 2]
     }
 
-    const selectElement = (elem) => {
-        if (selectedElement != null) {
-            selectedElement.classList.remove("abxy-hover");
-        }
-        selectedElement = elem;
-        selectedElementPosition = getElementPosition(selectedElement);
-        elem.classList.add("abxy-hover");
-    };
-
     const selectWithFilter = (filter) => {
+        if (!selectedElement || !document.contains(selectedElement)) {
+            abxy.selectElementClosestTo([0, 0])
+        }
         const elements = _.filter(getElements(), (elem) => 
             elem != selectedElement && filter(selectedElementPosition, elem)
         );
-        selectElementClosestTo(selectedElementPosition, elements);
+        abxy.selectElementClosestTo(selectedElementPosition, elements);
     }
 
     const selectUp = () => selectWithFilter((position, elem) =>
@@ -89,20 +83,30 @@ const distance = require('euclidean-distance');
         }
     }
 
-    const selectElementClosestTo = ([x, y], elements=null) => {
-        if (elements == null) {
-            elements = getElements();
-        }
-        if (elements.length == 0) {
-            return;
-        }
-        elements = _.sortBy(elements, (elem) => distance([x, y], getElementPosition(elem)));
-
-        
-        selectElement(elements[0]);
-    };
-
     window.abxy = {
+
+        selectElement: (elem) => {
+            if (selectedElement != null) {
+                selectedElement.classList.remove("abxy-hover");
+            }
+            selectedElement = elem;
+            selectedElementPosition = getElementPosition(selectedElement);
+            elem.classList.add("abxy-hover");
+        },
+
+        selectElementClosestTo: ([x, y], elements=null) => {
+            if (elements == null) {
+                elements = getElements();
+            }
+            if (elements.length == 0) {
+                return;
+            }
+            elements = _.sortBy(elements, (elem) => distance([x, y], getElementPosition(elem)));
+
+            
+            abxy.selectElement(elements[0]);
+        },
+
         init: (_configuration = {}) => {
             Object.assign(configuration, _configuration);
 
@@ -122,9 +126,9 @@ const distance = require('euclidean-distance');
             analogueMapping[configuration.gamepad_yAxis] = [selectUp, selectDown];
 
             if (configuration.initialElement != null) {
-                selectElement(configuration.initialElement);
+                abxy.selectElement(configuration.initialElement);
             } else {
-                selectElementClosestTo([0, 0]);
+                abxy.selectElementClosestTo([0, 0]);
             }
 
             // Set up keyboard control
@@ -137,7 +141,7 @@ const distance = require('euclidean-distance');
             // Set up mouse control
             document.addEventListener("mouseover", (evt) => {
                 if (evt.target.classList.contains("abxy")) {
-                    selectElement(evt.target);
+                    abxy.selectElement(evt.target);
                 }
             });
 

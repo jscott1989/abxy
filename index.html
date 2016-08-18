@@ -12,7 +12,7 @@
     <p>This is a page for testing ABXY. To allow things to be selectable/clickable you should add the class <code>abxy</code>.</p>
     <button class="abxy" onClick="alert('click1')">You can click this 1</button>
     <button class="abxy" onClick="alert('click2')">You can click this 2</button>
-    <button class="abxy" onClick="alert('click3')">You can click this 3</button>
+    <button class="abxy" onClick="var x = document.getElementById('disappear'); x.parentElement.removeChild(x);" id="disappear">Click this to make it disappear</button>
     <button>You can't click this</button>
 
     <p class="abxy" onClick="alert('anything')">This works for anything</p>
