@@ -56,14 +56,6 @@ const distance = require('euclidean-distance');
 
     const getElements = () => document.getElementsByClassName("abxy");
 
-    const getElementPosition = (elem) => {
-        if (elem == null) {
-            return [0, 0];
-        }
-        const b = elem.getBoundingClientRect();
-        return [b.left + b.right / 2, b.top + b.bottom / 2]
-    }
-
     const selectWithFilter = (filter) => {
         var [selectedElement, selectedElementPosition] = getSelectedElement();
         const elements = _.filter(getElements(), (elem) => 
@@ -72,17 +64,29 @@ const distance = require('euclidean-distance');
         abxy.selectElementClosestTo(selectedElementPosition, elements);
     }
 
-    const selectUp = () => selectWithFilter((position, elem) =>
-        getElementPosition(elem)[1] + configuration.minimumDistance < position[1]);
+    const selectUp = () => {
+        selectWithFilter((position, elem) =>
+            abxy.getElementPosition(elem)[1] + configuration.minimumDistance < position[1]);
+        document.dispatchEvent(new Event('abxy-move-selection'));
+    }
 
-    const selectDown = () => selectWithFilter((position, elem) =>
-        getElementPosition(elem)[1] - configuration.minimumDistance > position[1]);
+    const selectDown = () => {
+        selectWithFilter((position, elem) =>
+            abxy.getElementPosition(elem)[1] - configuration.minimumDistance > position[1]);
+        document.dispatchEvent(new Event('abxy-move-selection'));
+    }
 
-    const selectLeft = () => selectWithFilter((position, elem) =>
-        getElementPosition(elem)[0] + configuration.minimumDistance < position[0]);
+    const selectLeft = () => {
+        selectWithFilter((position, elem) =>
+            abxy.getElementPosition(elem)[0] + configuration.minimumDistance < position[0]);
+        document.dispatchEvent(new Event('abxy-move-selection'));
+    }
 
-    const selectRight = () => selectWithFilter((position, elem) =>
-        getElementPosition(elem)[0] - configuration.minimumDistance > position[0]);
+    const selectRight = () => {
+        selectWithFilter((position, elem) =>
+            abxy.getElementPosition(elem)[0] - configuration.minimumDistance > position[0]);
+        document.dispatchEvent(new Event('abxy-move-selection'));
+    }
 
     const click = () => {
         var [selectedElement, selectedElementPosition] = getSelectedElement();
@@ -92,13 +96,32 @@ const distance = require('euclidean-distance');
     }
 
     window.abxy = {
+        getElementPosition: (elem) => {
+            if (elem == null) {
+                return [0, 0];
+            }
+            const b = elem.getBoundingClientRect();
+
+            const width = b.right - b.left;
+            const height = b.bottom - b.top;
+
+            const bodyRect = document.body.getBoundingClientRect();
+
+            const c = [b.left - bodyRect.left, b.top - bodyRect.top];
+
+            return [c[0] + width / 2, c[1] + height / 2]
+        },
+
+        getSelectedElement: () => {
+            return selectedElement;
+        },
 
         selectElement: (elem) => {
             if (selectedElement != null) {
                 selectedElement.classList.remove("abxy-hover");
             }
             selectedElement = elem;
-            selectedElementPosition = getElementPosition(selectedElement);
+            selectedElementPosition = abxy.getElementPosition(selectedElement);
             elem.classList.add("abxy-hover");
         },
 
@@ -109,7 +132,7 @@ const distance = require('euclidean-distance');
             if (elements.length == 0) {
                 return;
             }
-            elements = _.sortBy(elements, (elem) => distance([x, y], getElementPosition(elem)));
+            elements = _.sortBy(elements, (elem) => distance([x, y], abxy.getElementPosition(elem)));
 
             
             abxy.selectElement(elements[0]);
